@@ -63,6 +63,21 @@ function PlayAnim(lib, anim)
   --print("y")
 
 end
+function hasPhone (cb)
+  if (ESX == nil) then return cb(0) end
+
+  ESX.TriggerServerCallback('gcphone:getItemAmount', function(qtty)
+
+    cb(qtty > 0)
+  end, 'phone')
+end
+
+function ShowNoPhoneWarning () 
+  if (ESX == nil) then return end
+	
+  exports['mythic_notify']:SendAlert('error', 'You can buy a Cell Phone at Digi Den')
+end
+
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
@@ -126,7 +141,7 @@ end)
 
 function OpenMenu()
   _menuPool:CloseAllMenus()
-  simCardMenu = NativeUI.CreateMenu("Téléphone", "Carte SIM", 5, 200)
+  simCardMenu = NativeUI.CreateMenu("Cellphone", "Sim Card", 5, 200)
   _menuPool:Add(simCardMenu)
   menu = simCardMenu
   number = {}
@@ -134,7 +149,7 @@ function OpenMenu()
   result = SimTab
   if #result == 0 then
 
-      use = NativeUI.CreateItem("Aucun", "")
+      use = NativeUI.CreateItem("No", "")
 
       menu:AddItem(use)
   end
@@ -143,11 +158,11 @@ function OpenMenu()
           number = result[i].number,
           label = result[i].label,
       })
-      local c = _menuPool:AddSubMenu(menu, result[i].label, "Numéro de la carte SIM: " .. result[i].number, true, true, false)
-      use = NativeUI.CreateItem("Utiliser", "")
-      ren = NativeUI.CreateItem("Renommer", "")
-      donner = NativeUI.CreateItem("Donner", "")
-      jeter = NativeUI.CreateItem("Supprimer", "")
+      local c = _menuPool:AddSubMenu(menu, result[i].label, "Sim Card #: " .. result[i].number, true, true, false)
+      use = NativeUI.CreateItem("Use", "")
+      ren = NativeUI.CreateItem("Change", "")
+      donner = NativeUI.CreateItem("Give", "")
+      jeter = NativeUI.CreateItem("Remove", "")
       c:AddItem(use)
       c:AddItem(ren)
       c:AddItem(donner)
@@ -191,7 +206,9 @@ function OpenMenu()
               local closestPed = GetPlayerPed(closestPlayer)
 
               if IsPedSittingInAnyVehicle(closestPed) then
-                  ESX.ShowNotification('~r~Vous ne pouvez pas donner quelque chose à quelqu\'un dans un véhicule')
+		  exports['mythic_notify']:SendAlert('error', 'You cannot give something to someone in a vehicle')
+					
+You cannot give something to someone in a vehicle
                   return
               end
 
@@ -203,7 +220,7 @@ function OpenMenu()
                    menumbk:RemoveItemAt(i)
                    menu:GoBack()
               else
-                  ESX.ShowNotification("~r~Personne à proximité")
+		 exports['mythic_notify']:SendAlert('error', 'There is noone nearby')
 
               end
 
@@ -274,9 +291,11 @@ Citizen.CreateThread(function()
           SendNUIMessage({event = 'updateBankbalance', banking = k})
         else
           UpMiniMapNotification("Pas de ~r~téléphone~s~")
+	  exports['mythic_notify']:SendAlert('error', 'You dont have a phone')	-- test						
         end
       else
         UpMiniMapNotification("Pas de ~r~carte sim lié~s~")
+	exports['mythic_notify']:SendAlert('error', 'No linked simcard') -- test						
       end
       end, 'tel')
 
@@ -601,7 +620,7 @@ function showFixePhoneHelper (coords)
       coords.x, coords.y, coords.z, 1)
     if dist <= 2.0 then
       SetTextComponentFormat("STRING")
-      AddTextComponentString("~g~" .. data.name .. ' ~o~' .. number .. '~n~~INPUT_PICKUP~~w~ Utiliser')
+      AddTextComponentString("~g~" .. data.name .. ' ~o~' .. number .. '~n~~INPUT_PICKUP~~w~ Use')			
       DisplayHelpTextFromStringLabel(0, 0, 0, -1)
       if IsControlJustPressed(1, KeyTakeCall) then
         startFixeCall(number)
@@ -627,7 +646,7 @@ Citizen.CreateThread(function ()
           inRangeToActivePhone = true
           if (dist <= 1.5) then 
             SetTextComponentFormat("STRING")
-            AddTextComponentString("~INPUT_PICKUP~ Décrocher")
+            AddTextComponentString("~INPUT_PICKUP~ Hang up")
             DisplayHelpTextFromStringLabel(0, 0, 1, -1)
             if IsControlJustPressed(1, KeyTakeCall) then
               PhonePlayCall(true)
@@ -934,7 +953,7 @@ RegisterNUICallback('takePhoto', function(data, cb)
       takePhoto = false
       break
     elseif IsControlJustPressed(1, 38) then -- TAKE.. PIC
-			exports['screenshot-basic']:requestScreenshotUpload(data.url, data.field, function(data)
+	exports['screenshot-basic']:requestScreenshotUpload(data.url, data.field, function(data)
         local resp = json.decode(data)
         DestroyMobilePhone()
         CellCamActivate(false, false)
