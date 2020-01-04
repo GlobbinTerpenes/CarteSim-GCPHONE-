@@ -7,9 +7,10 @@ math.randomseed(os.time())
 
 --- Pour les numero du style XXX-XXXX
 function getPhoneRandomNumber()
-    local numBase0 = math.random(100,999)
-    local numBase1 = math.random(0,9999)
-    local num = string.format("%03d-%04d", numBase0, numBase1 )
+    local numBase0 = math.random(420,420)
+    local numBAse1 = math.random(01,99)
+    local numBase2 = math.random(0,9999)
+    local num = string.format("%03d-%02d-%04d", numBase0, numBase1, numBase2 )
 	return num
 end
 
@@ -80,7 +81,7 @@ AddEventHandler('dqP:SetNumber', function(numb)
           ['@phone_number'] = phoneNumber
       }
   )
-	TriggerClientEvent("dqP:shownotif",_source,"Numéro utilisé : " .. tostring(phoneNumber),26)  
+	TriggerClientEvent("dqP:shownotif",_source,"Number used: " .. tostring(phoneNumber),26)  
 	
 
 	
@@ -132,6 +133,7 @@ AddEventHandler('dqP:Throw', function(number,data)
 				}
             )
 			TriggerClientEvent('esx:showNotification', source, '~r~-1 SIM '.. number)
+		        TriggerClientEvent('mythic_notify:client:SendAlert', source, { type = 'inform', text = '1 sim' .. number })
 
 		
 	
@@ -154,7 +156,7 @@ ESX.RegisterUsableItem('sim', function(source)
 
 		}
 	)
-	TriggerClientEvent("dqP:shownotif",_source,"Nouvelle carte SIM : " .. phoneNumber ,26)  	
+	TriggerClientEvent("dqP:shownotif",_source,"New Sim #: " .. phoneNumber ,26)  	
 	TriggerClientEvent("dqP:syncSim",source)
 	
 
@@ -242,7 +244,9 @@ AddEventHandler('dqP:GiveNumber', function(target,number)
 			  
 			end)
 			TriggerClientEvent('esx:showNotification', _source, '~r~-1 SIM '.. number)
+			TriggerClientEvent('mythic_notify:client:SendAlert', source, { type = 'inform', text = '1 sim' .. number })	
 			TriggerClientEvent('esx:showNotification', target, '~g~+1 SIM '.. number)
+			TriggerClientEvent('mythic_notify:client:SendAlert', target, { type = 'inform', text = '1 sim' .. number })	
 			TriggerClientEvent("dqP:syncSim",_source)
 			TriggerClientEvent("dqP:syncSim",target)
 		end
